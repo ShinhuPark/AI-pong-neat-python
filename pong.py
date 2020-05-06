@@ -29,7 +29,8 @@ def eval_genome(genome, config):
     fitness = 0.0
     done = False
     start_time=time.time()
-    series_of_actions=[]
+    series_of_keys=[]
+    series_of_nnOut=[]
     while not done:
         env.render()
 
@@ -40,18 +41,17 @@ def eval_genome(genome, config):
         imgarray = np.ndarray.flatten(ob)
         imgarray = np.interp(imgarray, (0, 254), (-1, +1))
         nnOut = net.activate(imgarray)
-        keys=[]
 
 
-        for i in nnOut:
-            if i > 0.5:
-                keys.append(1)
+        for o in nnOut:
+            if o > 0.:
+              keys = [1, 0]
             else:
-                keys.append(0)
-
+              keys = [0, 1]
         actions=[0]*4+keys+[0]*2
-        series_of_actions.append(keys)
 
+        series_of_keys.append(keys)
+        series_of_nnOut.append(nnOut)
 
         ob, rew, done, info = env.step(actions)
 
@@ -61,7 +61,9 @@ def eval_genome(genome, config):
 
         if score1 >19 or score2 >19:
             done = True
-    print(series_of_actions)
+
+    print(series_of_keys)
+#    print(series_of_actions)
     run_time=time.time()-start_time
 
     fitness=score2-score1/(run_time-2)
